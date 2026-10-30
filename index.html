@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1630">
+<title>Sonidos para dormir · Paola</title>
+<style>
+  :root{
+    --bg1:#0f1630; --bg2:#1b2550; --card:rgba(255,255,255,.06); --card-on:rgba(255,236,190,.16);
+    --line:rgba(255,255,255,.12); --text:#eef0f8; --muted:#aab1cc; --accent:#ffe3a3; --accent-ink:#2a2140;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:radial-gradient(120% 80% at 50% 0%,var(--bg2),var(--bg1) 70%) fixed, var(--bg1);
+    color:var(--text); font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:max(20px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));
+  }
+  main{max-width:460px;margin:0 auto}
+  header{text-align:center;margin:8px 0 22px}
+  header svg{width:54px;height:54px}
+  h1{font-size:1.5rem;font-weight:600;margin:6px 0 2px;letter-spacing:.2px}
+  .sub{color:var(--muted);margin:0;font-size:.95rem}
+  .sounds{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sound{
+    appearance:none;border:1px solid var(--line);background:var(--card);color:var(--text);
+    border-radius:16px;padding:16px 12px;text-align:left;cursor:pointer;font:inherit;min-height:76px;
+    transition:background .2s,border-color .2s;
+  }
+  .sound b{display:block;font-weight:600;font-size:1.02rem}
+  .sound span{color:var(--muted);font-size:.85rem}
+  .sound[aria-pressed="true"]{background:var(--card-on);border-color:var(--accent)}
+  .sound:last-child:nth-child(odd){grid-column:1/-1}
+  .play{
+    display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:22px 0 8px;
+    border:0;border-radius:999px;padding:18px;font-family:inherit;font-weight:600;font-size:1.15rem;line-height:1;cursor:pointer;
+    background:var(--accent);color:var(--accent-ink);
+  }
+  .play svg{width:22px;height:22px}
+  .status{text-align:center;color:var(--muted);font-size:.9rem;min-height:1.4em;margin:0 0 18px}
+  h2{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .chip{
+    appearance:none;border:1px solid var(--line);background:var(--card);color:var(--text);
+    border-radius:999px;padding:9px 14px;font:inherit;font-size:.92rem;cursor:pointer;
+  }
+  .chip[aria-pressed="true"]{background:var(--card-on);border-color:var(--accent)}
+  details{border:1px solid var(--line);border-radius:16px;padding:4px 16px;background:var(--card)}
+  summary{cursor:pointer;padding:12px 0;font-weight:600;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"＋";float:right;color:var(--muted)}
+  details[open] summary::after{content:"－"}
+  details ul{margin:0 0 14px;padding-left:18px;color:var(--muted)}
+  details li{margin:6px 0}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:26px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M40 8a24 24 0 1 0 16 38A20 20 0 0 1 40 8z" fill="#ffe3a3"/>
+      <circle cx="14" cy="14" r="1.6" fill="#ffe3a3" opacity=".8"/>
+      <circle cx="54" cy="12" r="1.2" fill="#ffe3a3" opacity=".7"/>
+      <circle cx="58" cy="28" r="1" fill="#ffe3a3" opacity=".6"/>
+    </svg>
+    <h1>Dulces sueños, Paola</h1>
+    <p class="sub">Sonidos para dormir</p>
+  </header>
+
+  <section class="sounds" id="sounds" aria-label="Sonidos"></section>
+
+  <button class="play" id="play" type="button">
+    <svg id="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg>
+    <span id="playLabel">Reproducir</span>
+  </button>
+  <p class="status" id="status" aria-live="polite"></p>
+
+  <h2>Volumen</h2>
+  <div class="chips" id="levels"></div>
+
+  <h2>Apagar después de</h2>
+  <div class="chips" id="timers"></div>
+
+  <details>
+    <summary>Para mamá y papá</summary>
+    <ul>
+      <li>Pongan el teléfono a unos 2 metros de la cuna, nunca dentro.</li>
+      <li>Volumen bajo: no más fuerte que una conversación tranquila. Empiecen con “Bajo” o “Medio” y ajusten con los botones del teléfono.</li>
+      <li>El sonido sigue con la pantalla bloqueada. Conviene dejar el teléfono cargando si va a sonar toda la noche.</li>
+      <li>Activen “No molestar” para que una notificación no la despierte.</li>
+      <li>Con la pantalla bloqueada, algunos teléfonos apagan el temporizador con un poco de retraso.</li>
+    </ul>
+  </details>
+
+  <footer>Con cariño para Paola</footer>
+</main>
+
+<audio id="audio" loop preload="none"></audio>
+
+<script>
+(() => {
+  const SR = 22050;
+
+  // ---------- generación de audio ----------
+  function rng(seed){ let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 * 2 - 1; }; }
+
+  function noise(kind, n, seed){
+    const r = rng(seed), x = new Float32Array(n);
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0, br=0, lp=0;
+    for (let i=0;i<n;i++){
+      const w = r();
+      if (kind === 'white'){ lp += 0.35*(w-lp); x[i] = lp; }
+      else if (kind === 'pink'){
+        b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759; b2=0.96900*b2+w*0.1538520;
+        b3=0.86650*b3+w*0.3104856; b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
+        x[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11; b6=w*0.115926;
+      } else { br = (br + 0.02*w)/1.02; x[i] = br*3.5; }
+    }
+    return x;
+  }
+
+  // ruido de largo n que empalma sin corte al repetirse
+  function loopNoise(kind, n, seed){
+    const F = Math.floor(SR*1.5), x = noise(kind, n+F, seed), y = new Float32Array(n);
+    for (let i=0;i<n;i++){
+      if (i < F){ const a = i/F; y[i] = x[i]*Math.sqrt(a) + x[n+i]*Math.sqrt(1-a); }
+      else y[i] = x[i];
+    }
+    return y;
+  }
+
+  // filtro paso bajo circular: se precalienta con el final para que el empalme no haga clic
+  function lowpass(x, a){
+    const n = x.length;
+    for (let k=0;k<2;k++){
+      let s = 0; for (let i=n-4000;i<n;i++) s += a*(x[i]-s);
+      for (let i=0;i<n;i++){ s += a*(x[i]-s); x[i]=s; }
+    }
+    return x;
+  }
+
+  const SOUNDS = {
+    blanco: { name:'Ruido blanco', desc:'Constante y parejo', trim:-3, make(){
+      return loopNoise('white', SR*30, 11);
+    }},
+    suave: { name:'Ruido suave', desc:'Grave, como un ventilador', make(){
+      return loopNoise('brown', SR*30, 23);
+    }},
+    lluvia: { name:'Lluvia', desc:'Lluvia tranquila', make(){
+      const n = SR*30, x = loopNoise('pink', n, 37), r = rng(91);
+      for (let i=0;i<n;i++) x[i]*=0.8;
+      for (let d=0; d<2600; d++){
+        const p = Math.floor((r()+1)/2*n), amp = 0.04 + 0.12*((r()+1)/2)**3, len = Math.floor(SR*0.012);
+        let ph = 0, f = 1800 + 2500*((r()+1)/2);
+        for (let k=0;k<len;k++){ ph += 2*Math.PI*f/SR; x[(p+k)%n] += amp*Math.sin(ph)*Math.exp(-k/(len*0.25)); }
+      }
+      return x;
+    }},
+    olas: { name:'Olas del mar', desc:'Vaivén lento', make(){
+      const P = 10, n = SR*P*3, a = loopNoise('brown', n, 53), b = loopNoise('pink', n, 59), x = new Float32Array(n);
+      for (let i=0;i<n;i++){
+        const t = (i/SR) % P, c = 0.5-0.5*Math.cos(2*Math.PI*t/P), e = 0.25 + 0.75*Math.pow(c,1.6);
+        x[i] = a[i]*0.7*(0.6+0.4*e) + b[i]*0.9*e;
+      }
+      return x;
+    }},
+    latido: { name:'Latido', desc:'Como dentro de mamá', make(){
+      const bpm = 72, P = 60/bpm, n = Math.round(SR*P*36), x = lowpass(loopNoise('brown', n, 71), 0.08);
+      for (let i=0;i<n;i++) x[i]*=0.9;
+      const beat = (t0, amp, f) => {
+        const s0 = Math.round(t0*SR), len = Math.round(SR*0.22);
+        for (let k=0;k<len;k++){
+          const t = k/SR, env = (1-Math.exp(-t/0.006))*Math.exp(-t/0.055);
+          x[(s0+k)%n] += amp*env*Math.sin(2*Math.PI*f*t*(1-0.25*t/0.22));
+        }
+      };
+      for (let j=0;j<36;j++){ beat(j*P, 0.9, 55); beat(j*P+0.29, 0.55, 48); }
+      return x;
+    }}
+  };
+
+  // nivel por energía (RMS), no por pico, para que todos los sonidos suenen parecido de fuertes
+  const LEVELS = { bajo:{label:'Bajo', db:-30}, medio:{label:'Medio', db:-24}, alto:{label:'Alto', db:-18} };
+  function toWavURL(x, db){
+    let peak = 0, s2 = 0;
+    for (let i=0;i<x.length;i++){ const a = Math.abs(x[i]); if (a > peak) peak = a; s2 += x[i]*x[i]; }
+    const rms = Math.sqrt(s2/x.length) || 1;
+    const g = Math.min(Math.pow(10, db/20)/rms, 0.95/(peak||1)), n = x.length, buf = new ArrayBuffer(44+n*2), v = new DataView(buf);
+    const w = (o,s) => { for (let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
+    w(0,'RIFF'); v.setUint32(4,36+n*2,true); w(8,'WAVE'); w(12,'fmt '); v.setUint32(16,16,true);
+    v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,SR,true); v.setUint32(28,SR*2,true);
+    v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,n*2,true);
+    for (let i=0;i<n;i++) v.setInt16(44+i*2, Math.max(-1,Math.min(1,x[i]*g))*32767, true);
+    return URL.createObjectURL(new Blob([buf], {type:'audio/wav'}));
+  }
+
+  const raw = {}, cache = {};
+  const urlFor = (id, lv) => {
+    const k = id + '|' + lv;
+    if (!cache[k]){
+      raw[id] = raw[id] || SOUNDS[id].make();
+      cache[k] = toWavURL(raw[id], LEVELS[lv].db + (SOUNDS[id].trim || 0));
+    }
+    return cache[k];
+  };
+
+  // ---------- interfaz ----------
+  const audio = document.getElementById('audio');
+  const playBtn = document.getElementById('play'), label = document.getElementById('playLabel');
+  const icon = document.getElementById('icon'), status = document.getElementById('status');
+  const PLAY = '<path d="M7 4.5v15l13-7.5z" fill="currentColor"/>';
+  const PAUSE = '<path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z" fill="currentColor"/>';
+
+  let current = 'blanco', timerMin = 0, endAt = 0, level = 'medio';
+  try {
+    current = localStorage.getItem('sp-sound') || current; timerMin = +localStorage.getItem('sp-timer') || 0;
+    level = localStorage.getItem('sp-level') || level;
+  } catch(e){}
+  if (!SOUNDS[current]) current = 'blanco';
+  if (!LEVELS[level]) level = 'medio';
+
+  const levelsEl = document.getElementById('levels');
+  for (const [k, l] of Object.entries(LEVELS)){
+    const b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button'; b.dataset.lv = k; b.textContent = l.label;
+    b.onclick = () => setLevel(k);
+    levelsEl.appendChild(b);
+  }
+
+  const soundsEl = document.getElementById('sounds');
+  for (const [id, s] of Object.entries(SOUNDS)){
+    const b = document.createElement('button');
+    b.className = 'sound'; b.type = 'button'; b.dataset.id = id;
+    b.innerHTML = `<b>${s.name}</b><span>${s.desc}</span>`;
+    b.onclick = () => select(id);
+    soundsEl.appendChild(b);
+  }
+  const timersEl = document.getElementById('timers');
+  for (const m of [0,30,60,90,120]){
+    const b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button'; b.dataset.m = m;
+    b.textContent = m ? (m < 60 ? `${m} min` : `${m/60} h`.replace('1.5','1½')) : 'Sin límite';
+    b.onclick = () => setTimer(m);
+    timersEl.appendChild(b);
+  }
+
+  function refresh(){
+    soundsEl.querySelectorAll('.sound').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === current));
+    timersEl.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === timerMin));
+    levelsEl.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.lv === level));
+    const on = !audio.paused;
+    icon.innerHTML = on ? PAUSE : PLAY;
+    label.textContent = on ? 'Pausar' : 'Reproducir';
+    if (on){
+      let t = `Sonando: ${SOUNDS[current].name}`;
+      if (endAt){ const left = Math.max(0, Math.ceil((endAt-Date.now())/60000)); t += ` · se apaga en ${left} min`; }
+      status.textContent = t;
+    } else status.textContent = '';
+  }
+
+  function mediaSession(){
+    if (!('mediaSession' in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: SOUNDS[current].name, artist: 'Dulces sueños, Paola' });
+      navigator.mediaSession.setActionHandler('play', () => start());
+      navigator.mediaSession.setActionHandler('pause', () => stop());
+      navigator.mediaSession.setActionHandler('stop', () => stop());
+    } catch(e){}
+  }
+
+  async function start(){
+    status.textContent = 'Preparando sonido…';
+    await new Promise(r => setTimeout(r, 20));
+    const url = urlFor(current, level);
+    if (audio.src !== url) audio.src = url;
+    audio.volume = 1;
+    try { await audio.play(); } catch(e){ status.textContent = 'Toca “Reproducir” otra vez.'; return; }
+    endAt = timerMin ? Date.now() + timerMin*60000 : 0;
+    mediaSession(); refresh();
+  }
+  function stop(){ audio.pause(); endAt = 0; refresh(); }
+
+  function select(id){
+    current = id; try { localStorage.setItem('sp-sound', id); } catch(e){}
+    if (!audio.paused){ const keep = endAt; start().then(() => { if (keep) endAt = keep; refresh(); }); }
+    else refresh();
+  }
+  function setLevel(k){
+    level = k; try { localStorage.setItem('sp-level', k); } catch(e){}
+    if (!audio.paused){ const keep = endAt; start().then(() => { if (keep) endAt = keep; refresh(); }); }
+    else refresh();
+  }
+  function setTimer(m){
+    timerMin = m; try { localStorage.setItem('sp-timer', m); } catch(e){}
+    endAt = (!audio.paused && m) ? Date.now() + m*60000 : 0;
+    refresh();
+  }
+
+  function tick(){
+    if (!endAt || audio.paused) return;
+    const left = endAt - Date.now();
+    if (left <= 0){ stop(); return; }
+    if (left < 20000) audio.volume = Math.max(0, left/20000);
+  }
+  setInterval(() => { tick(); if (!audio.paused) refresh(); }, 1000);
+  audio.addEventListener('timeupdate', tick);
+  document.addEventListener('visibilitychange', tick);
+  audio.addEventListener('pause', refresh);
+  audio.addEventListener('play', refresh);
+
+  playBtn.onclick = () => audio.paused ? start() : stop();
+  refresh();
+})();
+</script>
+</body>
+</html>
